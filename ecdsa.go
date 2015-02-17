@@ -1,4 +1,4 @@
-package pkilib
+package pki
 
 import (
   "crypto"
@@ -60,6 +60,14 @@ func (pr EcdsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
   asn1, err := x509.MarshalECPrivateKey(pr.private_key)
   if err != nil { return nil, err }
   pem_block := pem.Block{Type: PemLabelEcdsa, Bytes: asn1}
+  return pem.EncodeToMemory(&pem_block), nil
+}
+
+// marshal the public key to a pem block
+func (pu *EcdsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
+  asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
+  if err != nil { return nil, err }
+  pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
   return pem.EncodeToMemory(&pem_block), nil
 }
 

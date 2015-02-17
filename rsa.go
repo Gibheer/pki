@@ -1,4 +1,4 @@
-package pkilib
+package pki
 
 import (
   "crypto"
@@ -46,6 +46,10 @@ func (pr RsaPrivateKey) privateKey() crypto.PrivateKey {
 }
 
 func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
+  return nil, errors.New("not implemented yet!")
+}
+
+func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   return nil, errors.New("not implemented yet!")
 }
 

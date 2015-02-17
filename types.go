@@ -1,4 +1,4 @@
-package pkilib
+package pki
 
 import (
   "crypto"
@@ -6,6 +6,8 @@ import (
 
 // this file holds all the interfaces used in the program until it can be split
 // properly
+
+const PemLabelPublic = "PUBLIC KEY"
 
 type (
   // interface for any private key
@@ -21,6 +23,7 @@ type (
 
   // interface for any public key
   PublicKey interface {
+    Pemmer
     // use the public key to verify a message against a signature
     Verify(message []byte, signature []byte) (bool, error)
   }

@@ -52,6 +52,7 @@ func TestEcdsaFunctions(t *testing.T) {
   RunPrivateKeyTests("ecdsa", pk, t)
 }
 
+// test rsa private key functions
 func TestRsaFunctions(t *testing.T) {
   pk, err := NewPrivateKeyRsa(2048)
   if err != nil { t.Errorf("rsa: creating private key failed: %s", err) }

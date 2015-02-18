@@ -5,6 +5,7 @@ import (
   "crypto/rand"
   "crypto/rsa"
   "crypto/x509"
+  "encoding/pem"
   "errors"
 )
 
@@ -18,7 +19,7 @@ type (
   }
 
   RsaPublicKey struct {
-    public_key rsa.PublicKey
+    public_key *rsa.PublicKey
   }
 )
 
@@ -37,7 +38,7 @@ func LoadPrivateKeyRsa(raw []byte) (*RsaPrivateKey, error) {
 }
 
 func (pr *RsaPrivateKey) Public() PublicKey {
-  return &RsaPublicKey{pr.private_key.Public().(rsa.PublicKey)}
+  return &RsaPublicKey{pr.private_key.Public().(*rsa.PublicKey)}
 }
 
 func (pr RsaPrivateKey) Sign(message []byte) ([]byte, error) {
@@ -50,7 +51,9 @@ func (pr RsaPrivateKey) privateKey() crypto.PrivateKey {
 }
 
 func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
-  return nil, errors.New("not implemented yet!")
+  asn1 := x509.MarshalPKCS1PrivateKey(pr.private_key)
+  pem_block := pem.Block{Type: PemLabelRsa, Bytes: asn1}
+  return pem.EncodeToMemory(&pem_block), nil
 }
 
 func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {

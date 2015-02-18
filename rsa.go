@@ -57,7 +57,10 @@ func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
 }
 
 func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
-  return nil, errors.New("not implemented yet!")
+  asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
+  if err != nil { return nil, err }
+  pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
+  return pem.EncodeToMemory(&pem_block), nil
 }
 
 func (pu *RsaPublicKey) Verify(message []byte, signature []byte) (bool, error) {

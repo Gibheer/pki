@@ -8,6 +8,10 @@ import (
   "errors"
 )
 
+const (
+  PemLabelRsa = "RSA PRIVATE KEY"
+)
+
 type (
   RsaPrivateKey struct {
     private_key *rsa.PrivateKey

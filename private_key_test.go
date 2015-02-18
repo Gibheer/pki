@@ -11,8 +11,8 @@ var (
 )
 
 // run the marshal test
-func RunMarshalTest(pk_type string, pk Pemmer, label string, t *testing.T) ([]byte, error) {
-  marsh_pem, err := pk.MarshalPem()
+func RunMarshalTest(pk_type string, pe Pemmer, label string, t *testing.T) ([]byte, error) {
+  marsh_pem, err := pe.MarshalPem()
   if err != nil {
     t.Errorf("%s: marshal pem not working: %s", pk_type, err)
     return nil, err
@@ -29,6 +29,10 @@ func RunMarshalTest(pk_type string, pk Pemmer, label string, t *testing.T) ([]by
 // test other private key functions
 func RunPrivateKeyTests(pk_type string, pk PrivateKey, t *testing.T) {
   pu := pk.Public()
+
+  // TODO check return result of the marshalled public key
+  _, err := RunMarshalTest(pk_type + "-public", pu, PemLabelPublic, t)
+  if err != nil { return }
 
   signature, err := pk.Sign(SignatureMessage)
   if err != nil { t.Errorf("%s: error creating a signature: %s", pk_type, err) }

@@ -6,8 +6,10 @@ import (
   "crypto/elliptic"
   "crypto/rand"
   "crypto/x509"
+  "encoding/asn1"
   "encoding/pem"
   "errors"
+  "math/big"
 )
 
 const (
@@ -23,6 +25,10 @@ type (
 
   EcdsaPublicKey struct {
     public_key *ecdsa.PublicKey
+  }
+
+  signatureEcdsa struct {
+    R, S *big.Int
   }
 )
 
@@ -46,8 +52,14 @@ func (pr EcdsaPrivateKey) Public() PublicKey {
 }
 
 // sign a message with the private key
-func (pr EcdsaPrivateKey) Sign(message []byte) ([]byte, error) {
-  return make([]byte, 0), errors.New("not implemented yet!")
+func (pr EcdsaPrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, error) {
+  empty := make([]byte, 0)
+  if !hash.Available() {
+    return empty, errors.New("Hash method is not available!")
+  }
+  hashed_message := hash.New()
+  hashed_message.Write(message)
+  return pr.private_key.Sign(rand.Reader, hashed_message.Sum(nil), hash)
 }
 
 // get the private key
@@ -72,6 +84,11 @@ func (pu *EcdsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
 }
 
 // verify a message using the ecdsa public key
-func (pu *EcdsaPublicKey) Verify(message []byte, signature []byte) (bool, error) {
-  return false, errors.New("not implemented yet!")
+func (pu *EcdsaPublicKey) Verify(message []byte, signature_raw []byte, hash crypto.Hash) (bool, error) {
+  var sig signatureEcdsa
+  _, err := asn1.Unmarshal(signature_raw, &sig)
+  if err != nil { return false, err }
+  hashed_message := hash.New()
+  hashed_message.Write(message)
+  return ecdsa.Verify(pu.public_key, hashed_message.Sum(nil), sig.R, sig.S), nil
 }

@@ -1,6 +1,7 @@
 package pki
 
 import (
+  "crypto"
   "crypto/elliptic"
   "encoding/pem"
   "testing"
@@ -8,6 +9,7 @@ import (
 
 var (
   SignatureMessage = []byte("foobar")
+  SignatureHash    = crypto.SHA512
 )
 
 // run the marshal test
@@ -34,10 +36,10 @@ func RunPrivateKeyTests(pk_type string, pk PrivateKey, t *testing.T) {
   _, err := RunMarshalTest(pk_type + "-public", pu, PemLabelPublic, t)
   if err != nil { return }
 
-  signature, err := pk.Sign(SignatureMessage)
+  signature, err := pk.Sign(SignatureMessage, SignatureHash)
   if err != nil { t.Errorf("%s: error creating a signature: %s", pk_type, err) }
 
-  valid, err := pu.Verify(SignatureMessage, signature)
+  valid, err := pu.Verify(SignatureMessage, signature, SignatureHash)
   if err != nil { t.Errorf("%s: could not verify message: %s", pk_type, err) }
   if !valid { t.Errorf("%s: signature invalid, but should be valid!", pk_type) }
 }

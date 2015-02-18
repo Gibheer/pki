@@ -41,7 +41,7 @@ func (pr *RsaPrivateKey) Public() PublicKey {
   return &RsaPublicKey{pr.private_key.Public().(*rsa.PublicKey)}
 }
 
-func (pr RsaPrivateKey) Sign(message []byte) ([]byte, error) {
+func (pr RsaPrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, error) {
   return make([]byte, 0), errors.New("not implemented yet!")
 }
 
@@ -63,6 +63,6 @@ func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(&pem_block), nil
 }
 
-func (pu *RsaPublicKey) Verify(message []byte, signature []byte) (bool, error) {
+func (pu *RsaPublicKey) Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error) {
   return false, errors.New("not implemented yet!")
 }

@@ -14,8 +14,10 @@ type (
   PrivateKey interface {
     // derive a public key from the private key
     Public() PublicKey
-    // sign a message with the private key
-    Sign(message []byte) ([]byte, error)
+    // Sign a message using the public key and the given hash method.
+    // To use a hash method, include the package
+    //   import _ "crypto/sha512"
+    Sign(message []byte, hash crypto.Hash) ([]byte, error)
 
     // return the private key structure
     privateKey() crypto.PrivateKey
@@ -25,7 +27,7 @@ type (
   PublicKey interface {
     Pemmer
     // use the public key to verify a message against a signature
-    Verify(message []byte, signature []byte) (bool, error)
+    Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error)
   }
 
   Pemmer interface {

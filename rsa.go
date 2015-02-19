@@ -56,10 +56,12 @@ func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(&pem_block), nil
 }
 
+// restore a rsa public key
 func LoadPublicKeyRsa(raw []byte) (*RsaPublicKey, error) {
   return nil, errors.New("not implemented yet!")
 }
 
+// marshal a rsa public key into pem format
 func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
   if err != nil { return nil, err }
@@ -67,6 +69,7 @@ func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(&pem_block), nil
 }
 
+// verify a message with a signature using the public key
 func (pu *RsaPublicKey) Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error) {
   return false, errors.New("not implemented yet!")
 }

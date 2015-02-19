@@ -75,6 +75,16 @@ func (pr EcdsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(&pem_block), nil
 }
 
+// load an ecdsa public key
+func LoadPublicKeyEcdsa(raw []byte) (*EcdsaPublicKey, error) {
+  raw_pub, err := x509.ParsePKIXPublicKey(raw)
+  if err != nil { return nil, err }
+
+  pub, ok := raw_pub.(*ecdsa.PublicKey)
+  if !ok { return nil, errors.New("Not an ecdsa key!") }
+  return &EcdsaPublicKey{pub}, nil
+}
+
 // marshal the public key to a pem block
 func (pu *EcdsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)

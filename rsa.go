@@ -56,6 +56,10 @@ func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(&pem_block), nil
 }
 
+func LoadPublicKeyRsa(raw []byte) (*RsaPublicKey, error) {
+  return nil, errors.New("not implemented yet!")
+}
+
 func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
   asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
   if err != nil { return nil, err }

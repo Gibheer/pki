@@ -46,7 +46,7 @@ func (pr RsaPrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, error) {
 }
 
 // get the private key
-func (pr RsaPrivateKey) privateKey() crypto.PrivateKey {
+func (pr RsaPrivateKey) PrivateKey() crypto.PrivateKey {
   return pr.private_key
 }
 

@@ -63,7 +63,7 @@ func (pr EcdsaPrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, error)
 }
 
 // get the private key
-func (pr EcdsaPrivateKey) privateKey() crypto.PrivateKey {
+func (pr EcdsaPrivateKey) PrivateKey() crypto.PrivateKey {
   return pr.private_key
 }
 

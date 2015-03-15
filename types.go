@@ -20,7 +20,7 @@ type (
     Sign(message []byte, hash crypto.Hash) ([]byte, error)
 
     // return the private key structure
-    privateKey() crypto.PrivateKey
+    PrivateKey() crypto.PrivateKey
   }
 
   // interface for any public key

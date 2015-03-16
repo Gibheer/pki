@@ -5,7 +5,10 @@ import (
   "crypto/x509"
   "crypto/x509/pkix"
   "encoding/pem"
+  "fmt"
+  "math/big"
   "net"
+  "time"
 )
 
 const PemLabelCertificateRequest = "CERTIFICATE REQUEST"
@@ -14,13 +17,20 @@ type (
   CertificateData struct {
     Subject  pkix.Name
 
-    DnsNames       []string
+    DNSNames       []string
     EmailAddresses []string
-    IpAddresses    []net.IP
+    IPAddresses    []net.IP
   }
 
   Certificate x509.Certificate
   CertificateRequest x509.CertificateRequest
+
+  CertificateOptions struct {
+    SerialNumber        *big.Int
+    NotBefore           time.Time
+    NotAfter            time.Time // Validity bounds.
+    KeyUsage            x509.KeyUsage
+  }
 )
 
 func NewCertificateData() *CertificateData {
@@ -33,8 +43,8 @@ func (c *CertificateData) ToCertificateRequest(private_key PrivateKey) (*Certifi
   csr := &x509.CertificateRequest{}
 
   csr.Subject        = c.Subject
-  csr.DNSNames       = c.DnsNames
-  csr.IPAddresses    = c.IpAddresses
+  csr.DNSNames       = c.DNSNames
+  csr.IPAddresses    = c.IPAddresses
   csr.EmailAddresses = c.EmailAddresses
 
   csr_asn1, err := x509.CreateCertificateRequest(rand.Reader, csr, private_key.PrivateKey())
@@ -58,20 +68,37 @@ func (c *CertificateRequest) MarshalPem() (marshalledPemBlock, error) {
 // Convert the certificate sign request to a certificate using the private key
 // of the signer and the certificate of the signer.
 // If the certificate is null, the sign request will be used to sign itself.
+// Please also see the certificate options struct for information on mandatory fields.
 // For more information, please read http://golang.org/pkg/crypto/x509/#CreateCertificate
-func (c *CertificateRequest) ToCertificate(private_key PrivateKey, ca *Certificate) (*Certificate, error) {
+func (c *CertificateRequest) ToCertificate(private_key PrivateKey,
+        cert_opts CertificateOptions, ca *Certificate) (*Certificate, error) {
+
+  if err := cert_opts.Valid(); err != nil { return nil, err }
+
   template := &x509.Certificate{}
   template.Subject        = c.Subject
   template.DNSNames       = c.DNSNames
   template.IPAddresses    = c.IPAddresses
   template.EmailAddresses = c.EmailAddresses
 
+  // if no ca is given, we have to set IsCA to self sign
+  if ca == nil {
+    template.IsCA = true
+  }
+
+  template.NotBefore    = cert_opts.NotBefore
+  template.NotAfter     = cert_opts.NotAfter
+  template.KeyUsage     = cert_opts.KeyUsage
+  template.SerialNumber = cert_opts.SerialNumber
+
   var cert_asn1 []byte
   var err  error
+  // if we have no ca which can sign the cert, a self signed cert is wanted
+  // (or isn't it? Maybe we should split creation of the template? But that would be ugly)
   if ca == nil {
-    cert_asn1, err = x509.CreateCertificate(rand.Reader, template, template, c.PublicKey, private_key)
+    cert_asn1, err = x509.CreateCertificate(rand.Reader, template, template, c.PublicKey, private_key.PrivateKey())
   } else {
-    cert_asn1, err = x509.CreateCertificate(rand.Reader, template, (*x509.Certificate)(ca), c.PublicKey, private_key)
+    cert_asn1, err = x509.CreateCertificate(rand.Reader, template, (*x509.Certificate)(ca), c.PublicKey, private_key.PrivateKey())
   }
   if err != nil { return nil, err }
   return LoadCertificate(cert_asn1)
@@ -82,4 +109,9 @@ func LoadCertificate(raw []byte) (*Certificate, error) {
   cert, err := x509.ParseCertificate(raw)
   if err != nil { return nil, err }
   return (*Certificate)(cert), nil
+}
+
+func (co *CertificateOptions) Valid() error {
+  if co.SerialNumber == nil { return fmt.Errorf("No serial number set!") }
+  return nil
 }

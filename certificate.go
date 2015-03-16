@@ -11,7 +11,10 @@ import (
   "time"
 )
 
-const PemLabelCertificateRequest = "CERTIFICATE REQUEST"
+const (
+  PemLabelCertificateRequest = "CERTIFICATE REQUEST"
+  PemLabelCertificate        = "CERTIFICATE"
+)
 
 type (
   CertificateData struct {
@@ -109,6 +112,12 @@ func LoadCertificate(raw []byte) (*Certificate, error) {
   cert, err := x509.ParseCertificate(raw)
   if err != nil { return nil, err }
   return (*Certificate)(cert), nil
+}
+
+// marshal the certificate to a pem block
+func (c *Certificate) MarshalPem() (marshalledPemBlock, error) {
+  block := &pem.Block{Type: PemLabelCertificate, Bytes: c.Raw}
+  return pem.EncodeToMemory(block), nil
 }
 
 func (co *CertificateOptions) Valid() error {

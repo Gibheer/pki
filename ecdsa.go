@@ -32,14 +32,14 @@ type (
   }
 )
 
-// generate a new ecdsa private key
+// Create a new ECDSA private key using the specified curve.
 func NewPrivateKeyEcdsa(curve elliptic.Curve) (*EcdsaPrivateKey, error) {
   key, err := ecdsa.GenerateKey(curve, rand.Reader)
   if err != nil { return nil, err }
   return &EcdsaPrivateKey{key}, nil
 }
 
-// load the private key from the raw data
+// Load the private key from the asn1 representation.
 func LoadPrivateKeyEcdsa(raw []byte) (*EcdsaPrivateKey, error) {
   key, err := x509.ParseECPrivateKey(raw)
   if err != nil { return nil, err }

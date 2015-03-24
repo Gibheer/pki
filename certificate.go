@@ -32,6 +32,10 @@ type (
     SerialNumber        *big.Int
     NotBefore           time.Time
     NotAfter            time.Time // Validity bounds.
+    IsCA                bool
+    // how many sub ca are allowed between this ca and the end/final certificate
+    // if it is -1, then no limit will be set
+    CALength            int
     KeyUsage            x509.KeyUsage
   }
 )
@@ -92,6 +96,15 @@ func (c *CertificateRequest) ToCertificate(private_key PrivateKey,
   template.NotBefore    = cert_opts.NotBefore
   template.NotAfter     = cert_opts.NotAfter
   template.KeyUsage     = cert_opts.KeyUsage
+  template.IsCA         = cert_opts.IsCA
+  if cert_opts.IsCA {
+    template.BasicConstraintsValid = true
+  }
+  if cert_opts.CALength >= 0 {
+    template.MaxPathLen   = cert_opts.CALength
+    template.MaxPathLenZero = true
+    template.BasicConstraintsValid = true
+  }
   template.SerialNumber = cert_opts.SerialNumber
 
   var cert_asn1 []byte

@@ -15,41 +15,41 @@
 package pki
 
 import (
-  "crypto"
-  "io"
+	"crypto"
+	"io"
 )
 
 // This label is used as the type in the pem encoding of public keys.
 const PemLabelPublic = "PUBLIC KEY"
 
 type (
-  // PrivateKey is a common interface for all crypto implementations to provide
-  // the same functions, like deriving a public key or signing a message.
-  PrivateKey interface {
-    // Derive a new public key from the private key.
-    Public() PublicKey
-    // Sign a message using the public key and the given hash method.
-    // To use a hash method, include the package
-    //   import _ "crypto/sha512"
-    Sign(message []byte, hash crypto.Hash) ([]byte, error)
+	// PrivateKey is a common interface for all crypto implementations to provide
+	// the same functions, like deriving a public key or signing a message.
+	PrivateKey interface {
+		// Derive a new public key from the private key.
+		Public() PublicKey
+		// Sign a message using the public key and the given hash method.
+		// To use a hash method, include the package
+		//   import _ "crypto/sha512"
+		Sign(message []byte, hash crypto.Hash) ([]byte, error)
 
-    // Return the original go structure of the private key.
-    PrivateKey() crypto.PrivateKey
-  }
+		// Return the original go structure of the private key.
+		PrivateKey() crypto.PrivateKey
+	}
 
-  // PublicKey is used by the different crypto implementations to provide the
-  // same functionality like verifying a message against a signature.
-  PublicKey interface {
-    Pemmer
-    // This function can be used to verify a message against a provided signature
-    // using the given hash function.
-    Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error)
-  }
+	// PublicKey is used by the different crypto implementations to provide the
+	// same functionality like verifying a message against a signature.
+	PublicKey interface {
+		Pemmer
+		// This function can be used to verify a message against a provided signature
+		// using the given hash function.
+		Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error)
+	}
 
-  // Pemmer is used by all crypto structures which need to be available
-  // in the pem format. The result can then be written to any structure
-  // implementing the io.Writer interface.
-  Pemmer interface {
-    MarshalPem() (io.WriterTo, error)
-  }
+	// Pemmer is used by all crypto structures which need to be available
+	// in the pem format. The result can then be written to any structure
+	// implementing the io.Writer interface.
+	Pemmer interface {
+		MarshalPem() (io.WriterTo, error)
+	}
 )

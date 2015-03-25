@@ -7,6 +7,7 @@ import (
   "crypto/x509"
   "encoding/pem"
   "errors"
+  "io"
 )
 
 const (
@@ -50,10 +51,10 @@ func (pr RsaPrivateKey) PrivateKey() crypto.PrivateKey {
   return pr.private_key
 }
 
-func (pr RsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
+func (pr RsaPrivateKey) MarshalPem() (io.WriterTo, error) {
   asn1 := x509.MarshalPKCS1PrivateKey(pr.private_key)
   pem_block := pem.Block{Type: PemLabelRsa, Bytes: asn1}
-  return pem.EncodeToMemory(&pem_block), nil
+  return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 
 // restore a rsa public key
@@ -62,11 +63,11 @@ func LoadPublicKeyRsa(raw []byte) (*RsaPublicKey, error) {
 }
 
 // marshal a rsa public key into pem format
-func (pu *RsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
+func (pu *RsaPublicKey) MarshalPem() (io.WriterTo, error) {
   asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
   if err != nil { return nil, err }
   pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
-  return pem.EncodeToMemory(&pem_block), nil
+  return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 
 // verify a message with a signature using the public key

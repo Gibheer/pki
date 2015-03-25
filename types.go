@@ -16,6 +16,7 @@ package pki
 
 import (
   "crypto"
+  "io"
 )
 
 // This label is used as the type in the pem encoding of public keys.
@@ -47,6 +48,6 @@ type (
   // in the pem format. The result can then be written to any structure
   // implementing the io.Writer interface.
   Pemmer interface {
-    MarshalPem() (marshalledPemBlock, error)
+    MarshalPem() (io.WriterTo, error)
   }
 )

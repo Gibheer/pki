@@ -9,6 +9,7 @@ import (
   "encoding/asn1"
   "encoding/pem"
   "errors"
+  "io"
   "math/big"
 )
 
@@ -72,11 +73,11 @@ func (pr EcdsaPrivateKey) PrivateKey() crypto.PrivateKey {
 
 // This function implements the Pemmer interface to marshal the private key
 // into a pem block.
-func (pr EcdsaPrivateKey) MarshalPem() (marshalledPemBlock, error) {
+func (pr EcdsaPrivateKey) MarshalPem() (io.WriterTo, error) {
   asn1, err := x509.MarshalECPrivateKey(pr.private_key)
   if err != nil { return nil, err }
   pem_block := pem.Block{Type: PemLabelEcdsa, Bytes: asn1}
-  return pem.EncodeToMemory(&pem_block), nil
+  return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 
 // This functoin loads an ecdsa public key from the asn.1 representation.
@@ -91,11 +92,11 @@ func LoadPublicKeyEcdsa(raw []byte) (*EcdsaPublicKey, error) {
 
 // This function implements the Pemmer interface to marshal the public key into
 // a pem block.
-func (pu *EcdsaPublicKey) MarshalPem() (marshalledPemBlock, error) {
+func (pu *EcdsaPublicKey) MarshalPem() (io.WriterTo, error) {
   asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
   if err != nil { return nil, err }
   pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
-  return pem.EncodeToMemory(&pem_block), nil
+  return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 
 // This function verifies a message using the public key, signature and hash

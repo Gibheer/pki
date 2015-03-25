@@ -11,12 +11,15 @@ import (
   "time"
 )
 
+// labels used in the pem file format to mark certificate sign requests and certificates
 const (
   PemLabelCertificateRequest = "CERTIFICATE REQUEST"
   PemLabelCertificate        = "CERTIFICATE"
 )
 
 type (
+  // Use CertificateData to fill in the minimum data you need to create a certificate
+  // sign request.
   CertificateData struct {
     Subject  pkix.Name
 
@@ -25,9 +28,13 @@ type (
     IPAddresses    []net.IP
   }
 
+  // Certificate is an alias on the x509.Certificate to add some methods.
   Certificate x509.Certificate
+  // CertificateRequest is an alias on the x509.CertificateRequest to add some methods.
   CertificateRequest x509.CertificateRequest
 
+  // CertificateOptions is used to provide the necessary information to create
+  // a certificate from a certificate sign request.
   CertificateOptions struct {
     SerialNumber        *big.Int
     NotBefore           time.Time
@@ -40,6 +47,7 @@ type (
   }
 )
 
+// Create a new set of certificate data.
 func NewCertificateData() *CertificateData {
   return &CertificateData{Subject: pkix.Name{}}
 }
@@ -133,6 +141,7 @@ func (c *Certificate) MarshalPem() (marshalledPemBlock, error) {
   return pem.EncodeToMemory(block), nil
 }
 
+// Check if the certificate options have the required fields set.
 func (co *CertificateOptions) Valid() error {
   if co.SerialNumber == nil { return fmt.Errorf("No serial number set!") }
   return nil

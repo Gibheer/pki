@@ -17,29 +17,29 @@ type (
 )
 
 // run the marshal test
-func RunMarshalTest(pk_type string, pe Pemmer, label string, t *testing.T) ([]byte, error) {
-  marsh_pem, err := pe.MarshalPem()
+func RunMarshalTest(pkType string, pe Pemmer, label string, t *testing.T) ([]byte, error) {
+  marshPem, err := pe.MarshalPem()
   if err != nil {
-    t.Errorf("%s: marshal pem not working: %s", pk_type, err)
+    t.Errorf("%s: marshal pem not working: %s", pkType, err)
     return nil, err
   }
 
-  block, _ := pem.Decode(marsh_pem)
+  block, _ := pem.Decode(marshPem)
   if block.Type != label {
-    t.Errorf("%s: marshalled pem wrong: %s", pk_type, err)
+    t.Errorf("%s: marshalled pem wrong: %s", pkType, err)
     return nil, err
   }
   return block.Bytes, nil
 }
 
 // test other private key functions
-func RunPrivateKeyTests(pk_type string, pk PrivateKey, pu PublicKey, t *testing.T) {
+func RunPrivateKeyTests(pkType string, pk PrivateKey, pu PublicKey, t *testing.T) {
   signature, err := pk.Sign(SignatureMessage, SignatureHash)
-  if err != nil { t.Errorf("%s: error creating a signature: %s", pk_type, err) }
+  if err != nil { t.Errorf("%s: error creating a signature: %s", pkType, err) }
 
   valid, err := pu.Verify(SignatureMessage, signature, SignatureHash)
-  if err != nil { t.Errorf("%s: could not verify message: %s", pk_type, err) }
-  if !valid { t.Errorf("%s: signature invalid, but should be valid!", pk_type) }
+  if err != nil { t.Errorf("%s: could not verify message: %s", pkType, err) }
+  if !valid { t.Errorf("%s: signature invalid, but should be valid!", pkType) }
 }
 
 // test ecdsa private key functions
@@ -47,16 +47,16 @@ func TestEcdsaFunctions(t *testing.T) {
   pk, err := NewPrivateKeyEcdsa(elliptic.P521())
   if err != nil { t.Errorf("ecdsa: creating private key failed: %s", err) }
 
-  block_bytes, err := RunMarshalTest("ecdsa", pk, PemLabelEcdsa, t)
+  blockBytes, err := RunMarshalTest("ecdsa", pk, PemLabelEcdsa, t)
   if err != nil { return }
 
-  pk, err = LoadPrivateKeyEcdsa(block_bytes)
+  pk, err = LoadPrivateKeyEcdsa(blockBytes)
   if err != nil { t.Errorf("ecdsa: pem content wrong: %s", err) }
 
-  block_bytes, err = RunMarshalTest("ecdsa-public", pk.Public(), PemLabelPublic, t)
+  blockBytes, err = RunMarshalTest("ecdsa-public", pk.Public(), PemLabelPublic, t)
   if err != nil { return }
 
-  pu, err := LoadPublicKeyEcdsa(block_bytes)
+  pu, err := LoadPublicKeyEcdsa(blockBytes)
   if err != nil { t.Errorf("ecdsa-public: pem content wrong: %s", err) }
 
   RunPrivateKeyTests("ecdsa", pk, pu, t)
@@ -67,17 +67,17 @@ func TestRsaFunctions(t *testing.T) {
   pk, err := NewPrivateKeyRsa(2048)
   if err != nil { t.Errorf("rsa: creating private key failed: %s", err) }
 
-  block_bytes, err := RunMarshalTest("rsa", pk, PemLabelRsa, t)
+  blockBytes, err := RunMarshalTest("rsa", pk, PemLabelRsa, t)
   if err != nil { return }
 
-  pk, err = LoadPrivateKeyRsa(block_bytes)
+  pk, err = LoadPrivateKeyRsa(blockBytes)
   if err != nil { t.Errorf("rsa: pem content wrong: %s", err) }
 
 
-  block_bytes, err = RunMarshalTest("rsa-public", pk.Public(), PemLabelPublic, t)
+  blockBytes, err = RunMarshalTest("rsa-public", pk.Public(), PemLabelPublic, t)
   if err != nil { return }
 
-  pu, err := LoadPublicKeyRsa(block_bytes)
+  pu, err := LoadPublicKeyRsa(blockBytes)
   if err != nil { t.Errorf("rsa-public: pem content wrong: %s", err) }
 
   RunPrivateKeyTests("rsa", pk, pu, t)

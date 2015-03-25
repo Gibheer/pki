@@ -23,7 +23,8 @@ import (
 const PemLabelPublic = "PUBLIC KEY"
 
 type (
-  // This is the common interface for all private keys.
+  // PrivateKey is a common interface for all crypto implementations to provide
+  // the same functions, like deriving a public key or signing a message.
   PrivateKey interface {
     // Derive a new public key from the private key.
     Public() PublicKey
@@ -36,7 +37,8 @@ type (
     PrivateKey() crypto.PrivateKey
   }
 
-  // This interface has to be implemented by every public key structure.
+  // PublicKey is used by the different crypto implementations to provide the
+  // same functionality like verifying a message against a signature.
   PublicKey interface {
     Pemmer
     // This function can be used to verify a message against a provided signature
@@ -44,7 +46,7 @@ type (
     Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error)
   }
 
-  // This interface is used by all crypto structures which need to be available
+  // Pemmer is used by all crypto structures which need to be available
   // in the pem format. The result can then be written to any structure
   // implementing the io.Writer interface.
   Pemmer interface {

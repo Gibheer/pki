@@ -42,8 +42,9 @@ type (
 		IsCA         bool
 		// how many sub ca are allowed between this ca and the end/final certificate
 		// if it is -1, then no limit will be set
-		CALength int
-		KeyUsage x509.KeyUsage
+		CALength         int
+		KeyUsage         x509.KeyUsage      // for what can the certificate be used
+		KeyExtendedUsage []x509.ExtKeyUsage // extended usage for the certificate
 	}
 )
 
@@ -110,6 +111,7 @@ func (c *CertificateRequest) ToCertificate(private_key PrivateKey,
 	template.NotBefore = cert_opts.NotBefore
 	template.NotAfter = cert_opts.NotAfter
 	template.KeyUsage = cert_opts.KeyUsage
+	template.ExtKeyUsage = cert_opts.KeyExtendedUsage
 	template.IsCA = cert_opts.IsCA
 	if cert_opts.IsCA {
 		template.BasicConstraintsValid = true

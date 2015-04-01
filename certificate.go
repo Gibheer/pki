@@ -45,6 +45,7 @@ type (
 		CALength         int
 		KeyUsage         x509.KeyUsage      // for what can the certificate be used
 		KeyExtendedUsage []x509.ExtKeyUsage // extended usage for the certificate
+		CRLUrls          []string
 	}
 )
 
@@ -112,6 +113,7 @@ func (c *CertificateRequest) ToCertificate(private_key PrivateKey,
 	template.NotAfter = cert_opts.NotAfter
 	template.KeyUsage = cert_opts.KeyUsage
 	template.ExtKeyUsage = cert_opts.KeyExtendedUsage
+	template.CRLDistributionPoints = cert_opts.CRLUrls
 	template.IsCA = cert_opts.IsCA
 	if cert_opts.IsCA {
 		template.BasicConstraintsValid = true

@@ -63,7 +63,13 @@ func (pr RsaPrivateKey) MarshalPem() (io.WriterTo, error) {
 
 // restore a rsa public key
 func LoadPublicKeyRsa(raw []byte) (*RsaPublicKey, error) {
-	return nil, errors.New("not implemented yet!")
+	pub := &RsaPublicKey{}
+	if pub_raw, err := x509.ParsePKIXPublicKey(raw); err != nil {
+		return nil, err
+	} else {
+		pub.public_key = pub_raw.(*rsa.PublicKey)
+	}
+	return pub, nil
 }
 
 // marshal a rsa public key into pem format

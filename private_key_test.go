@@ -1,6 +1,7 @@
 package pki
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/elliptic"
 	"encoding/pem"
@@ -24,7 +25,10 @@ func RunMarshalTest(pkType string, pe Pemmer, label string, t *testing.T) ([]byt
 		return nil, err
 	}
 
-	block, _ := pem.Decode(marshPem)
+	buf := &bytes.Buffer{}
+	marshPem.WriteTo(buf)
+
+	block, _ := pem.Decode(buf.Bytes())
 	if block.Type != label {
 		t.Errorf("%s: marshalled pem wrong: %s", pkType, err)
 		return nil, err
@@ -53,6 +57,7 @@ func TestEcdsaFunctions(t *testing.T) {
 	pk, err := NewPrivateKeyEcdsa(elliptic.P521())
 	if err != nil {
 		t.Errorf("ecdsa: creating private key failed: %s", err)
+		return
 	}
 
 	blockBytes, err := RunMarshalTest("ecdsa", pk, PemLabelEcdsa, t)
@@ -63,6 +68,7 @@ func TestEcdsaFunctions(t *testing.T) {
 	pk, err = LoadPrivateKeyEcdsa(blockBytes)
 	if err != nil {
 		t.Errorf("ecdsa: pem content wrong: %s", err)
+		return
 	}
 
 	blockBytes, err = RunMarshalTest("ecdsa-public", pk.Public(), PemLabelPublic, t)
@@ -73,6 +79,7 @@ func TestEcdsaFunctions(t *testing.T) {
 	pu, err := LoadPublicKeyEcdsa(blockBytes)
 	if err != nil {
 		t.Errorf("ecdsa-public: pem content wrong: %s", err)
+		return
 	}
 
 	RunPrivateKeyTests("ecdsa", pk, pu, t)
@@ -83,6 +90,7 @@ func TestRsaFunctions(t *testing.T) {
 	pk, err := NewPrivateKeyRsa(2048)
 	if err != nil {
 		t.Errorf("rsa: creating private key failed: %s", err)
+		return
 	}
 
 	blockBytes, err := RunMarshalTest("rsa", pk, PemLabelRsa, t)
@@ -93,6 +101,7 @@ func TestRsaFunctions(t *testing.T) {
 	pk, err = LoadPrivateKeyRsa(blockBytes)
 	if err != nil {
 		t.Errorf("rsa: pem content wrong: %s", err)
+		return
 	}
 
 	blockBytes, err = RunMarshalTest("rsa-public", pk.Public(), PemLabelPublic, t)
@@ -103,7 +112,41 @@ func TestRsaFunctions(t *testing.T) {
 	pu, err := LoadPublicKeyRsa(blockBytes)
 	if err != nil {
 		t.Errorf("rsa-public: pem content wrong: %s", err)
+		return
 	}
 
 	RunPrivateKeyTests("rsa", pk, pu, t)
+}
+
+// test rsa private key functions
+func TestEd25519Functions(t *testing.T) {
+	pk, err := NewPrivateKeyEd25519()
+	if err != nil {
+		t.Errorf("ed25519: creating private key failed: %s", err)
+		return
+	}
+
+	blockBytes, err := RunMarshalTest("ed25519", pk, PemLabelEd25519, t)
+	if err != nil {
+		return
+	}
+
+	pk, err = LoadPrivateKeyEd25519(blockBytes)
+	if err != nil {
+		t.Errorf("ed25519: pem content wrong: %s", err)
+		return
+	}
+
+	blockBytes, err = RunMarshalTest("ed25519-public", pk.Public(), PemLabelPublic, t)
+	if err != nil {
+		return
+	}
+
+	pu, err := LoadPublicKeyEd25519(blockBytes)
+	if err != nil {
+		t.Errorf("ed25519-public: pem content wrong: %s", err)
+		return
+	}
+
+	RunPrivateKeyTests("ed25519", pk, pu, t)
 }

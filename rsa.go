@@ -47,7 +47,12 @@ func (pr *RsaPrivateKey) Public() PublicKey {
 }
 
 func (pr RsaPrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, error) {
-	return make([]byte, 0), errors.New("not implemented yet!")
+	if !hash.Available() {
+		return make([]byte, 0), errors.New("Hash method is not available!")
+	}
+	hashed_message := hash.New()
+	hashed_message.Write(message)
+	return rsa.SignPKCS1v15(rand.Reader, pr.private_key, hash, hashed_message.Sum(nil))
 }
 
 // get the private key
@@ -84,5 +89,10 @@ func (pu *RsaPublicKey) MarshalPem() (io.WriterTo, error) {
 
 // verify a message with a signature using the public key
 func (pu *RsaPublicKey) Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error) {
-	return false, errors.New("not implemented yet!")
+	hashed_message := hash.New()
+	hashed_message.Write(message)
+	if err := rsa.VerifyPKCS1v15(pu.public_key, hash, hashed_message.Sum(nil), signature); err != nil {
+		return false, err
+	}
+	return true, nil
 }

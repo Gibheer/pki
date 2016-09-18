@@ -6,6 +6,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"math/big"
 	"net"
 	"time"
@@ -81,9 +82,9 @@ func LoadCertificateSignRequest(raw []byte) (*CertificateRequest, error) {
 }
 
 // Return the certificate sign request as a pem block.
-func (c *CertificateRequest) MarshalPem() (marshalledPemBlock, error) {
+func (c *CertificateRequest) MarshalPem() (io.WriterTo, error) {
 	block := &pem.Block{Type: PemLabelCertificateRequest, Bytes: c.Raw}
-	return pem.EncodeToMemory(block), nil
+	return marshalledPemBlock(pem.EncodeToMemory(block)), nil
 }
 
 // Convert the certificate sign request to a certificate using the private key
@@ -152,7 +153,7 @@ func LoadCertificate(raw []byte) (*Certificate, error) {
 // marshal the certificate to a pem block
 func (c *Certificate) MarshalPem() (marshalledPemBlock, error) {
 	block := &pem.Block{Type: PemLabelCertificate, Bytes: c.Raw}
-	return pem.EncodeToMemory(block), nil
+	return marshalledPemBlock(pem.EncodeToMemory(block)), nil
 }
 
 // Check if the certificate options have the required fields set.

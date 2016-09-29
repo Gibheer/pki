@@ -151,7 +151,7 @@ func LoadCertificate(raw []byte) (*Certificate, error) {
 }
 
 // marshal the certificate to a pem block
-func (c *Certificate) MarshalPem() (marshalledPemBlock, error) {
+func (c *Certificate) MarshalPem() (io.WriterTo, error) {
 	block := &pem.Block{Type: PemLabelCertificate, Bytes: c.Raw}
 	return marshalledPemBlock(pem.EncodeToMemory(block)), nil
 }

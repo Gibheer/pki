@@ -61,9 +61,18 @@ func (pr RsaPrivateKey) PrivateKey() crypto.PrivateKey {
 }
 
 func (pr RsaPrivateKey) MarshalPem() (io.WriterTo, error) {
-	asn1 := x509.MarshalPKCS1PrivateKey(pr.private_key)
-	pem_block := pem.Block{Type: PemLabelRsa, Bytes: asn1}
+	pem_block, err := pr.ToPem()
+	if err != nil { // it does not currently return an error, but maybe that will change
+		return nil, err
+	}
 	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
+}
+
+func (pr RsaPrivateKey) ToPem() (pem.Block, error) {
+	return pem.Block{
+		Type:  PemLabelRsa,
+		Bytes: x509.MarshalPKCS1PrivateKey(pr.private_key),
+	}, nil
 }
 
 // restore a rsa public key

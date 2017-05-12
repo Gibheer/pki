@@ -78,12 +78,20 @@ func (pr EcdsaPrivateKey) PrivateKey() crypto.PrivateKey {
 // This function implements the Pemmer interface to marshal the private key
 // into a pem block.
 func (pr EcdsaPrivateKey) MarshalPem() (io.WriterTo, error) {
-	asn1, err := x509.MarshalECPrivateKey(pr.private_key)
+	pem_block, err := pr.ToPem()
 	if err != nil {
 		return nil, err
 	}
-	pem_block := pem.Block{Type: PemLabelEcdsa, Bytes: asn1}
 	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
+}
+
+// This function implements ToPem to return the raw pem block.
+func (pr EcdsaPrivateKey) ToPem() (pem.Block, error) {
+	asn1, err := x509.MarshalECPrivateKey(pr.private_key)
+	if err != nil {
+		return pem.Block{}, err
+	}
+	return pem.Block{Type: PemLabelEcdsa, Bytes: asn1}, nil
 }
 
 // This functoin loads an ecdsa public key from the asn.1 representation.

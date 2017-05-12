@@ -81,10 +81,18 @@ func LoadCertificateSignRequest(raw []byte) (*CertificateRequest, error) {
 	return (*CertificateRequest)(csr), nil
 }
 
+// ToPem returns a pem.Block representing the CertificateRequest.
+func (c *CertificateRequest) ToPem() (pem.Block, error) {
+	return pem.Block{Type: PemLabelCertificateRequest, Bytes: c.Raw}, nil
+}
+
 // Return the certificate sign request as a pem block.
 func (c *CertificateRequest) MarshalPem() (io.WriterTo, error) {
-	block := &pem.Block{Type: PemLabelCertificateRequest, Bytes: c.Raw}
-	return marshalledPemBlock(pem.EncodeToMemory(block)), nil
+	if block, err := c.ToPem(); err != nil {
+		return nil, err
+	} else {
+		return marshalledPemBlock(pem.EncodeToMemory(&block)), nil
+	}
 }
 
 // Convert the certificate sign request to a certificate using the private key
@@ -152,8 +160,16 @@ func LoadCertificate(raw []byte) (*Certificate, error) {
 
 // marshal the certificate to a pem block
 func (c *Certificate) MarshalPem() (io.WriterTo, error) {
-	block := &pem.Block{Type: PemLabelCertificate, Bytes: c.Raw}
-	return marshalledPemBlock(pem.EncodeToMemory(block)), nil
+	if block, err := c.ToPem(); err != nil {
+		return nil, err
+	} else {
+		return marshalledPemBlock(pem.EncodeToMemory(&block)), nil
+	}
+}
+
+// ToPem returns the pem block of the certificate.
+func (c *Certificate) ToPem() (pem.Block, error) {
+	return pem.Block{Type: PemLabelCertificate, Bytes: c.Raw}, nil
 }
 
 // Check if the certificate options have the required fields set.

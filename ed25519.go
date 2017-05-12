@@ -70,8 +70,15 @@ func (pr *Ed25519PrivateKey) Sign(message []byte, hash crypto.Hash) ([]byte, err
 
 // Export the private key into the Pem format.
 func (pr Ed25519PrivateKey) MarshalPem() (io.WriterTo, error) {
-	pem_block := pem.Block{Type: PemLabelEd25519, Bytes: pr.private_key[:]}
+	pem_block, err := pr.ToPem()
+	if err != nil { // it does not currently return an error, but maybe that will change
+		return nil, err
+	}
 	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
+}
+
+func (pr Ed25519PrivateKey) ToPem() (pem.Block, error) {
+	return pem.Block{Type: PemLabelEd25519, Bytes: pr.private_key[:]}, nil
 }
 
 // Load the public key from a raw byte stream.

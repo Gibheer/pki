@@ -16,6 +16,7 @@ package pki
 
 import (
 	"crypto"
+	"encoding/pem"
 	"io"
 )
 
@@ -35,6 +36,9 @@ type (
 
 		// Return the original go structure of the private key.
 		PrivateKey() crypto.PrivateKey
+
+		// ToPem must return a pem block of the private key.
+		ToPem() (pem.Block, error)
 	}
 
 	// PublicKey is used by the different crypto implementations to provide the
@@ -51,5 +55,11 @@ type (
 	// implementing the io.Writer interface.
 	Pemmer interface {
 		MarshalPem() (io.WriterTo, error)
+	}
+
+	// ToPem returns the raw pem block to make it possible to write the result to
+	// any place.
+	PemOutput interface {
+		ToPem() (pem.Block, error)
 	}
 )

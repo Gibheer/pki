@@ -92,9 +92,17 @@ func LoadPublicKeyEd25519(raw []byte) (*Ed25519PublicKey, error) {
 	return &Ed25519PublicKey{pu_loaded}, nil
 }
 
+// ToPem returns the pem encoded public key.
+func (pu Ed25519PublicKey) ToPem() (pem.Block, error) {
+	return pem.Block{Type: PemLabelPublic, Bytes: pu.public_key[:]}, nil
+}
+
 // Export the public key into the pem format.
 func (pu Ed25519PublicKey) MarshalPem() (io.WriterTo, error) {
-	pem_block := pem.Block{Type: PemLabelPublic, Bytes: pu.public_key[:]}
+	pem_block, err := pu.ToPem()
+	if err != nil {
+		return nil, err
+	}
 	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 

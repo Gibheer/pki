@@ -86,13 +86,21 @@ func LoadPublicKeyRsa(raw []byte) (*RsaPublicKey, error) {
 	return pub, nil
 }
 
+// ToPem returns the pem encoded public key.
+func (pu *RsaPublicKey) ToPem() (pem.Block, error) {
+	asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
+	if err != nil {
+		return pem.Block{}, err
+	}
+	return pem.Block{Type: PemLabelPublic, Bytes: asn1}, nil
+}
+
 // marshal a rsa public key into pem format
 func (pu *RsaPublicKey) MarshalPem() (io.WriterTo, error) {
-	asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
+	pem_block, err := pu.ToPem()
 	if err != nil {
 		return nil, err
 	}
-	pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
 	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 

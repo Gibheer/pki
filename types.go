@@ -45,6 +45,7 @@ type (
 	// same functionality like verifying a message against a signature.
 	PublicKey interface {
 		Pemmer
+		PemOutput
 		// This function can be used to verify a message against a provided signature
 		// using the given hash function.
 		Verify(message []byte, signature []byte, hash crypto.Hash) (bool, error)

@@ -108,15 +108,23 @@ func LoadPublicKeyEcdsa(raw []byte) (*EcdsaPublicKey, error) {
 	return &EcdsaPublicKey{pub}, nil
 }
 
+// ToPem returns the pem block of the public key.
+func (pu *EcdsaPublicKey) ToPem() (pem.Block, error) {
+	asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
+	if err != nil {
+		return pem.Block{}, err
+	}
+	return pem.Block{Type: PemLabelPublic, Bytes: asn1}, nil
+}
+
 // This function implements the Pemmer interface to marshal the public key into
 // a pem block.
 func (pu *EcdsaPublicKey) MarshalPem() (io.WriterTo, error) {
-	asn1, err := x509.MarshalPKIXPublicKey(pu.public_key)
-	if err != nil {
+	if block, err := pu.ToPem(); err != nil {
 		return nil, err
+	} else {
+		return marshalledPemBlock(pem.EncodeToMemory(&block)), nil
 	}
-	pem_block := pem.Block{Type: PemLabelPublic, Bytes: asn1}
-	return marshalledPemBlock(pem.EncodeToMemory(&pem_block)), nil
 }
 
 // This function verifies a message using the public key, signature and hash
